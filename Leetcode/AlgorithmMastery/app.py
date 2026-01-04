@@ -173,6 +173,28 @@ def render_worked_example(example_data: dict, difficulty: str):
     st.divider()
     HashMapVisualizer.render_array_with_pointer(example_data['array'], current_step['current_index'])
     
+    # Algorithm code
+    st.divider()
+    with st.expander("💻 Algorithm Code", expanded=True):
+        st.subheader("Python Implementation")
+        code = '''def twoSum(nums: List[int], target: int) -> List[int]:
+    """
+    Find two numbers that add up to target
+    Time: O(n) | Space: O(n)
+    """
+    complement_map = {}
+    
+    for i, num in enumerate(nums):
+        complement = target - num
+        
+        if complement in complement_map:
+            return [complement_map[complement], i]
+        
+        complement_map[num] = i
+    
+    return []'''
+        st.code(code, language="python")
+    
     # Step explanation
     st.divider()
     st.subheader("📖 Step Explanation")
