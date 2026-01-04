@@ -89,6 +89,8 @@ st.markdown("""
         gap: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        padding-left: 0.1rem !important;
+        padding-right: 0.1rem !important;
     }
     /* Reduce input/selectbox margins */
     .stInputBase {
@@ -99,15 +101,28 @@ st.markdown("""
     .stRadio, .stSelectbox {
         margin-bottom: 0 !important;
     }
-    }
     /* Reduce plotly chart margins */
     div[data-testid="stPlotlyChart"] {
         margin: 0 !important;
+        padding: 0 !important;
         padding-bottom: 0 !important;
     }
-    /* Compact column spacing */
+    /* Ultra compact column spacing */
     div[data-testid="column"] {
-        padding: 0.2rem !important;
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+    .stButton button {
+        margin: 0 !important;
+        padding: 0.3rem 0.5rem !important;
+    }
+    .stMetric {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .stCaption {
+        margin: 0 !important;
+        padding: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -899,7 +914,7 @@ def display_algorithm_code(current_step=None, language="Python"):
 import random
 
 # ==================== TOP CONFIGURATION BAR ====================
-config_col1, config_col2, config_col3, config_col4, config_col5 = st.columns([1.5, 1.5, 1, 1.2, 0.8], gap="small")
+config_col1, config_col2, config_col3, config_col4, config_col5 = st.columns([1.5, 1.5, 1, 1.2, 0.8], gap="0")
 
 # Initialize auto-generated values if they exist
 if 'auto_nums' not in st.session_state:
@@ -1149,10 +1164,9 @@ with config_col5:
         st.rerun()
 
 # ==================== EXPLANATION & LEARNING CONTROLS ====================
-st.markdown("---")
 
 with st.expander("⚙️ Settings", expanded=False):
-    settings_row1_col1, settings_row1_col2, settings_row1_col3, settings_row1_col4 = st.columns(4, gap="small")
+    settings_row1_col1, settings_row1_col2, settings_row1_col3, settings_row1_col4 = st.columns(4, gap="0")
     
     with settings_row1_col1:
         st.caption("Depth")
@@ -1177,7 +1191,7 @@ with st.expander("⚙️ Settings", expanded=False):
     
     with settings_row1_col4:
         st.caption("Test Cases")
-        edge_col1, edge_col2, edge_col3 = st.columns(3, gap="small")
+        edge_col1, edge_col2, edge_col3 = st.columns(3, gap="0")
         
         with edge_col1:
             if st.button("Dup", use_container_width=True, help="Duplicates", key="dup_btn"):
@@ -1267,7 +1281,7 @@ else:
             step = st.session_state.steps[st.session_state.current_step]
             
             # Two Column Layout: Algorithm Code (Left/Wider) | Scrollable Execution State (Right/Narrower)
-            col_code, col_state = st.columns([55, 45], gap="medium")
+            col_code, col_state = st.columns([55, 45], gap="0")
             
             # LEFT: Algorithm Code with cursor
             with col_code:
@@ -1279,7 +1293,7 @@ else:
                     st.markdown(display_algorithm_code(cursor_line, st.session_state.selected_language), unsafe_allow_html=True)
                 
                 # Navigation controls - compact and close to code
-                nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([0.9, 0.9, 1.2, 0.9, 0.5], gap="small")
+                nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([0.9, 0.9, 1.2, 0.9, 0.5], gap="0")
                 with nav_col1:
                     if st.button("⬅️ Prev", disabled=st.session_state.current_step == 0, use_container_width=True):
                         st.session_state.current_step -= 1
@@ -1307,7 +1321,7 @@ else:
                 st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
                 
                 # Hash map and Memory State side by side
-                viz_col1, viz_col2 = st.columns([1.2, 0.8], gap="medium")
+                viz_col1, viz_col2 = st.columns([1.2, 0.8], gap="0")
                 
                 with viz_col1:
                     st.markdown("**🗂️ Hash Map State**")
@@ -1328,7 +1342,7 @@ else:
                     
                     # Hash Map Evolution - collapsible
                     with st.expander("🗺️ Hash Map", expanded=True):
-                        map_col1, map_col2 = st.columns(2, gap="small")
+                        map_col1, map_col2 = st.columns(2, gap="0")
                         with map_col1:
                             st.caption("Before:")
                             if step['map_before']:
@@ -1501,8 +1515,7 @@ else:
             st.session_state.auto_play = False
         
         # Manual Navigation Controls (Prev/Next)
-        st.markdown("---")
-        nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1.5, 1, 0.5], gap="small")
+        nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1.5, 1, 0.5], gap="0")
         
         with nav_col1:
             if st.button("⬅️ Previous", disabled=st.session_state.current_step == 0, use_container_width=True, key="anim_prev"):
@@ -1553,7 +1566,7 @@ else:
                         st.markdown(display_algorithm_code(cursor_line, st.session_state.selected_language), unsafe_allow_html=True)
                     
                     # Three column layout for animation
-                    col1, col2, col3 = st.columns([1.2, 1.2, 0.8], gap="small")
+                    col1, col2, col3 = st.columns([1.2, 1.2, 0.8], gap="0")
                     
                     with col1:
                         st.markdown("**📊 Array**")
@@ -1581,7 +1594,6 @@ else:
                 time.sleep(play_speed / 1000)
             
             # Final result
-            st.markdown("---")
             if st.session_state.steps[-1].get('found'):
                 final_step = st.session_state.steps[-1]
                 st.success(f"✅ **Solution Found!** Indices: [{final_step['result'][0]}, {final_step['result'][1]}]")
@@ -1604,7 +1616,7 @@ else:
                 st.markdown(display_algorithm_code(cursor_line, st.session_state.selected_language), unsafe_allow_html=True)
             
             # Three column layout
-            col1, col2, col3 = st.columns([1.2, 1.2, 0.8], gap="small")
+            col1, col2, col3 = st.columns([1.2, 1.2, 0.8], gap="0")
             
             with col1:
                 st.markdown("**📊 Array**")
@@ -1630,7 +1642,6 @@ else:
             
             # Show final result if on last step
             if st.session_state.current_step == len(st.session_state.steps) - 1:
-                st.markdown("---")
                 if step.get('found'):
                     st.success(f"✅ **Solution Found!** Indices: [{step['result'][0]}, {step['result'][1]}]")
                     st.metric("Values", f"{step['result_values'][0]} + {step['result_values'][1]} = {target}")
