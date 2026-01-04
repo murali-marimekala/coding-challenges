@@ -899,7 +899,7 @@ def display_algorithm_code(current_step=None, language="Python"):
 import random
 
 # ==================== TOP CONFIGURATION BAR ====================
-config_col1, config_col2, config_col3, config_col4, config_col5 = st.columns([2, 2, 1.5, 1.5, 0.8], gap="small")
+config_col1, config_col2, config_col3, config_col4, config_col5 = st.columns([1.5, 1.5, 1, 1.2, 0.8], gap="small")
 
 # Initialize auto-generated values if they exist
 if 'auto_nums' not in st.session_state:
@@ -1102,22 +1102,22 @@ with config_col1:
     DEFAULT_ARRAY_STR = ", ".join(map(str, DEFAULT_ARRAY))
     
     default_nums = DEFAULT_ARRAY_STR if st.session_state.auto_nums is None else ", ".join(map(str, st.session_state.auto_nums))
-    input_text = st.text_input("📝 Array:", value=default_nums, label_visibility="collapsed", placeholder="e.g., 2, 7, 11, 15")
+    input_text = st.text_input("Array:", value=default_nums, label_visibility="collapsed", placeholder="2, 7, 11, 15", key="array_input")
     try:
         nums = [int(x.strip()) for x in input_text.split(",") if x.strip()]
         if not nums:
-            st.warning("Please enter at least one number")
+            st.warning("⚠️ Enter numbers", icon="⚠️")
     except ValueError:
         nums = []
-        st.error("Invalid input: Please enter comma-separated integers only")
+        st.error("❌ Numbers only", icon="❌")
 
 with config_col2:
     DEFAULT_TARGET = 9
     default_target = DEFAULT_TARGET if st.session_state.auto_target is None else st.session_state.auto_target
-    target = st.number_input("🎯 Target:", value=default_target, label_visibility="collapsed", step=1)
+    target = st.number_input("Target:", value=default_target, label_visibility="collapsed", step=1, key="target_input")
 
 with config_col3:
-    if st.button("🎲 Auto", width='stretch'):
+    if st.button("🎲 Auto", use_container_width=True, key="auto_btn"):
         # Generate random array and target with bounds checking
         MIN_ARRAY_SIZE = 2
         MAX_ARRAY_SIZE = 8
@@ -1139,65 +1139,66 @@ with config_col3:
 
 with config_col4:
     execution_mode = st.selectbox("Mode:", 
-                                 ["Step by Step", "Show All Steps", "Skip to Result", "🎬 Auto-Play Animation"],
-                                 label_visibility="collapsed")
+                                 ["Step by Step", "Show All Steps", "Skip to Result", "🎬 Auto-Play"],
+                                 label_visibility="collapsed", key="mode_select")
 
 with config_col5:
     theme_icon = "🌙" if not st.session_state.dark_mode else "☀️"
-    if st.button(theme_icon, help="Toggle dark/light mode", width='stretch'):
+    if st.button(theme_icon, help="Theme", use_container_width=True, key="theme_btn"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
 
 # ==================== EXPLANATION & LEARNING CONTROLS ====================
 st.markdown("---")
 
-with st.expander("⚙️ Learning Settings", expanded=False):
-    learn_col1, learn_col2, learn_col3 = st.columns(3, gap="small")
+with st.expander("⚙️ Settings", expanded=False):
+    settings_row1_col1, settings_row1_col2, settings_row1_col3, settings_row1_col4 = st.columns(4, gap="small")
     
-    with learn_col1:
-        st.caption("📖 Explanation Depth")
-        explanation_depth = st.radio("Explanation Depth", ["Simple", "Detailed"], horizontal=True, label_visibility="collapsed")
+    with settings_row1_col1:
+        st.caption("Depth")
+        explanation_depth = st.radio("Depth", ["Simple", "Detailed"], horizontal=True, label_visibility="collapsed", key="depth_radio")
         if 'explanation_depth' not in st.session_state:
             st.session_state.explanation_depth = explanation_depth
     
-    with learn_col2:
-        st.caption("⚡ Animation Speed")
+    with settings_row1_col2:
+        st.caption("Speed (ms)")
         ANIM_MIN_MS = 500
         ANIM_MAX_MS = 3000
         ANIM_DEFAULT_MS = 2000
         ANIM_STEP_MS = 250
-        animation_speed = st.slider("Animation Speed", ANIM_MIN_MS, ANIM_MAX_MS, ANIM_DEFAULT_MS, ANIM_STEP_MS, label_visibility="collapsed")
+        animation_speed = st.slider("Speed", ANIM_MIN_MS, ANIM_MAX_MS, ANIM_DEFAULT_MS, ANIM_STEP_MS, label_visibility="collapsed", key="speed_slider")
         if 'animation_speed' not in st.session_state:
             st.session_state.animation_speed = animation_speed
     
-    with learn_col3:
-        st.caption("💻 Programming Language")
-        language = st.radio("Language", ["Python", "C", "C++"], horizontal=True, label_visibility="collapsed")
+    with settings_row1_col3:
+        st.caption("Language")
+        language = st.radio("Lang", ["Python", "C", "C++"], horizontal=True, label_visibility="collapsed", key="lang_radio")
         st.session_state.selected_language = language
     
-    st.caption("🧪 Edge Case Presets:")
-    edge_col1, edge_col2, edge_col3 = st.columns(3, gap="small")
-    
-    with edge_col1:
-        if st.button("Duplicates", width='stretch', help="Test with duplicate numbers"):
-            st.session_state.auto_nums = [1, 1, 2]
-            st.session_state.auto_target = 2
-            st.session_state.current_step = 0
-            st.rerun()
-    
-    with edge_col2:
-        if st.button("Negatives", width='stretch', help="Test with negative numbers"):
-            st.session_state.auto_nums = [-2, 7, 11, 15]
-            st.session_state.auto_target = 5
-            st.session_state.current_step = 0
-            st.rerun()
-    
-    with edge_col3:
-        if st.button("Boundary", width='stretch', help="Test with target at edge"):
-            st.session_state.auto_nums = [1, 2, 3]
-            st.session_state.auto_target = 4
-            st.session_state.current_step = 0
-            st.rerun()
+    with settings_row1_col4:
+        st.caption("Test Cases")
+        edge_col1, edge_col2, edge_col3 = st.columns(3, gap="small")
+        
+        with edge_col1:
+            if st.button("Dup", use_container_width=True, help="Duplicates", key="dup_btn"):
+                st.session_state.auto_nums = [1, 1, 2]
+                st.session_state.auto_target = 2
+                st.session_state.current_step = 0
+                st.rerun()
+        
+        with edge_col2:
+            if st.button("Neg", use_container_width=True, help="Negatives", key="neg_btn"):
+                st.session_state.auto_nums = [-2, 7, 11, 15]
+                st.session_state.auto_target = 5
+                st.session_state.current_step = 0
+                st.rerun()
+        
+        with edge_col3:
+            if st.button("Bound", use_container_width=True, help="Boundary", key="bound_btn"):
+                st.session_state.auto_nums = [1, 2, 3]
+                st.session_state.auto_target = 4
+                st.session_state.current_step = 0
+                st.rerun()
 
 # Initialize session state
 if 'current_step' not in st.session_state:
@@ -1552,25 +1553,21 @@ else:
                         st.markdown(display_algorithm_code(cursor_line, st.session_state.selected_language), unsafe_allow_html=True)
                     
                     # Three column layout for animation
-                    col1, col2, col3 = st.columns(3, gap="medium")
+                    col1, col2, col3 = st.columns([1.2, 1.2, 0.8], gap="small")
                     
                     with col1:
-                        st.markdown("**📊 Array Visualization**")
+                        st.markdown("**📊 Array**")
                         array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
                         st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
                     
                     with col2:
-                        st.markdown("**🗂️ Hash Map State**")
+                        st.markdown("**🗂️ Hash Map**")
                         hashmap_fig = create_animated_hashmap(step['map_after'], idx + 1, step['found'])
                         st.plotly_chart(hashmap_fig, width='stretch', config={'displayModeBar': False})
                     
                     with col3:
-                        st.markdown("**📖 Step Details**")
-                        st.info(f"""
-                        **Current Number:** {step['current_number']}  
-                        **Looking for:** {step['complement_needed']}  
-                        **Found:** {'✅ YES' if step['found'] else '❌ NO'}
-                        """)
+                        st.markdown("**Details**")
+                        st.info(f"**Num:** {step['current_number']}\n**Need:** {step['complement_needed']}\n**Found:** {'✅' if step['found'] else '❌'}")
                     
                     # Step explanation
                     explanation = get_step_explanation(step, st.session_state.explanation_depth)
@@ -1607,25 +1604,21 @@ else:
                 st.markdown(display_algorithm_code(cursor_line, st.session_state.selected_language), unsafe_allow_html=True)
             
             # Three column layout
-            col1, col2, col3 = st.columns(3, gap="medium")
+            col1, col2, col3 = st.columns([1.2, 1.2, 0.8], gap="small")
             
             with col1:
-                st.markdown("**📊 Array Visualization**")
+                st.markdown("**📊 Array**")
                 array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
                 st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
             
             with col2:
-                st.markdown("**🗂️ Hash Map State**")
+                st.markdown("**🗂️ Hash Map**")
                 hashmap_fig = create_animated_hashmap(step['map_after'], st.session_state.current_step + 1, step['found'])
                 st.plotly_chart(hashmap_fig, width='stretch', config={'displayModeBar': False})
             
             with col3:
-                st.markdown("**📖 Step Details**")
-                st.info(f"""
-                **Current Number:** {step['current_number']}  
-                **Looking for:** {step['complement_needed']}  
-                **Found:** {'✅ YES' if step['found'] else '❌ NO'}
-                """)
+                st.markdown("**Details**")
+                st.info(f"**Num:** {step['current_number']}\n**Need:** {step['complement_needed']}\n**Found:** {'✅' if step['found'] else '❌'}")
             
             # Step explanation
             explanation = get_step_explanation(step, st.session_state.explanation_depth)
@@ -1653,11 +1646,13 @@ else:
             step = st.session_state.steps[-1]
             st.success("✅ Solution Found!")
             
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric("Indices", f"[{step['result'][0]}, {step['result'][1]}]")
+                st.metric("Index 1", step['result'][0])
             with col2:
-                st.metric("Sum", f"{step['result_values'][0]} + {step['result_values'][1]} = {target}")
+                st.metric("Index 2", step['result'][1])
+            with col3:
+                st.metric("Sum", f"{step['result_values'][0]} + {step['result_values'][1]}")
             
             # Visualization
             st.markdown("**Array with Solution:**")
