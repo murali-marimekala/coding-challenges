@@ -104,20 +104,6 @@ def render_worked_example(example_data: dict, difficulty: str):
     st.subheader(f"📚 Worked Example - {difficulty} Level")
     st.divider()
     
-    # Example description
-    st.markdown(f"**Scenario:** {example_data['explanation']}")
-    
-    # Input/Output display
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Input Array", str(example_data['array']))
-    with col2:
-        st.metric("Target Sum", example_data['target'])
-    with col3:
-        st.metric("Expected Output", str(example_data['expected']))
-    
-    st.divider()
-    
     # Execute algorithm with step tracking
     steps, final_map = TwoSumSolver.solve_with_steps(
         example_data['array'],
@@ -128,53 +114,18 @@ def render_worked_example(example_data: dict, difficulty: str):
         st.error("No solution found!")
         return
     
-    # Playback controls
-    st.subheader("⏯️ Playback Controls")
-    playback = PlaybackController(total_steps=len(steps))
-    playback.render_controls()
+    # Problem Overview (Expandable)
+    with st.expander("📋 Problem Overview", expanded=True):
+        st.markdown(f"**Scenario:** {example_data['explanation']}")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Input Array", str(example_data['array']))
+        with col2:
+            st.metric("Target Sum", example_data['target'])
+        with col3:
+            st.metric("Expected Output", str(example_data['expected']))
     
-    # Current step display
-    st.divider()
-    st.subheader("📍 Current Step Analysis")
-    
-    current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
-    current_step = steps[current_step_idx]
-    
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Step", f"{current_step_idx + 1}/{len(steps)}")
-    with col2:
-        st.metric("Current Number", current_step['current_number'])
-    with col3:
-        st.metric("Complement Needed", current_step['complement_needed'])
-    with col4:
-        status = "✅ FOUND!" if current_step['found'] else "❌ Not found"
-        st.write(f"**Status:** {status}")
-    
-    st.divider()
-    
-    # Hash map visualization
-    st.subheader("🗺️ Hash Map Evolution")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.write("**Before this step:**")
-        HashMapVisualizer.render_hash_map(current_step['map_before'], None, None)
-    
-    with col2:
-        st.write("**After this step:**")
-        HashMapVisualizer.render_hash_map(
-            current_step['map_after'],
-            current_step['current_number'] if not current_step['found'] else None,
-            current_step['complement_needed'] if current_step['found'] else None
-        )
-    
-    # Array visualization
-    st.divider()
-    HashMapVisualizer.render_array_with_pointer(example_data['array'], current_step['current_index'])
-    
-    # Algorithm code
-    st.divider()
+    # Algorithm Code with Controls (Expandable)
     with st.expander("💻 Algorithm Code", expanded=True):
         st.subheader("Python Implementation")
         code = '''def twoSum(nums: List[int], target: int) -> List[int]:
@@ -194,17 +145,64 @@ def render_worked_example(example_data: dict, difficulty: str):
     
     return []'''
         st.code(code, language="python")
+        
+        # Playback controls under code
+        st.markdown("**Playback Controls:**")
+        playback = PlaybackController(total_steps=len(steps))
+        playback.render_controls()
     
-    # Step explanation
-    st.divider()
-    st.subheader("📖 Step Explanation")
-    for line in example_data['step_explanations']:
-        st.write(line)
+    # Current Step Analysis (Expandable)
+    with st.expander("📍 Current Step Analysis", expanded=True):
+        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
+        current_step = steps[current_step_idx]
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Step", f"{current_step_idx + 1}/{len(steps)}")
+        with col2:
+            st.metric("Current Number", current_step['current_number'])
+        with col3:
+            st.metric("Complement Needed", current_step['complement_needed'])
+        with col4:
+            status = "✅ FOUND!" if current_step['found'] else "❌ Not found"
+            st.write(f"**Status:** {status}")
     
-    # Solution found
-    if current_step['found']:
-        st.divider()
-        st.success(f"✅ Solution Found! Indices: {current_step['result']}")
+    # Hash Map Evolution (Expandable)
+    with st.expander("🗺️ Hash Map Evolution", expanded=True):
+        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
+        current_step = steps[current_step_idx]
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.write("**Before this step:**")
+            HashMapVisualizer.render_hash_map(current_step['map_before'], None, None)
+        
+        with col2:
+            st.write("**After this step:**")
+            HashMapVisualizer.render_hash_map(
+                current_step['map_after'],
+                current_step['current_number'] if not current_step['found'] else None,
+                current_step['complement_needed'] if current_step['found'] else None
+            )
+    
+    # Array Visualization (Expandable)
+    with st.expander("📊 Array Pointer", expanded=True):
+        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
+        current_step = steps[current_step_idx]
+        HashMapVisualizer.render_array_with_pointer(example_data['array'], current_step['current_index'])
+    
+    # Step Explanation (Expandable)
+    with st.expander("📖 Step Explanation", expanded=True):
+        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
+        current_step = steps[current_step_idx]
+        for line in example_data['step_explanations']:
+            st.write(line)
+        
+        # Solution found
+        if current_step['found']:
+            st.divider()
+            st.success(f"✅ Solution Found! Indices: {current_step['result']}")
 
 
 def render_sidebar():
