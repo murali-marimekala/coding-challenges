@@ -1281,18 +1281,18 @@ else:
                 # Navigation controls - compact and close to code
                 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([0.9, 0.9, 1.2, 0.9, 0.5], gap="small")
                 with nav_col1:
-                    if st.button("⬅️ Prev", disabled=st.session_state.current_step == 0, width='stretch'):
+                    if st.button("⬅️ Prev", disabled=st.session_state.current_step == 0, use_container_width=True):
                         st.session_state.current_step -= 1
                         st.rerun()
                 with nav_col2:
-                    if st.button("🔄 Reset", width='stretch'):
+                    if st.button("🔄 Reset", use_container_width=True):
                         st.session_state.current_step = 0
                         st.rerun()
                 with nav_col3:
                     progress_percent = ((st.session_state.current_step + 1) / total_steps * 100) if total_steps > 0 else 0
                     st.caption(f"Step {st.session_state.current_step + 1}/{total_steps} ({progress_percent:.0f}%)")
                 with nav_col4:
-                    if st.button("Next ➡️", disabled=st.session_state.current_step >= total_steps - 1, width='stretch'):
+                    if st.button("Next ➡️", disabled=st.session_state.current_step >= total_steps - 1, use_container_width=True):
                         st.session_state.current_step += 1
                         st.rerun()
                 with nav_col5:
@@ -1489,11 +1489,11 @@ else:
             st.session_state.animation_speed = play_speed
         
         with anim_col2:
-            if st.button("▶️ Play All", width='stretch'):
+            if st.button("▶️ Play All", use_container_width=True):
                 st.session_state.auto_play = True
         
         with anim_col3:
-            if st.button("⏸️ Stop", width='stretch'):
+            if st.button("⏸️ Stop", use_container_width=True):
                 st.session_state.auto_play = False
         
         # Initialize auto_play state if needed
@@ -1505,13 +1505,13 @@ else:
         nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1.5, 1, 0.5], gap="small")
         
         with nav_col1:
-            if st.button("⬅️ Previous", disabled=st.session_state.current_step == 0, width='stretch', key="anim_prev"):
+            if st.button("⬅️ Previous", disabled=st.session_state.current_step == 0, use_container_width=True, key="anim_prev"):
                 st.session_state.current_step -= 1
                 st.session_state.auto_play = False
                 st.rerun()
         
         with nav_col2:
-            if st.button("🔄 Reset", width='stretch', key="anim_reset"):
+            if st.button("🔄 Reset", use_container_width=True, key="anim_reset"):
                 st.session_state.current_step = 0
                 st.session_state.auto_play = False
                 st.rerun()
@@ -1522,7 +1522,7 @@ else:
                 st.caption(f"Step {st.session_state.current_step + 1}/{len(st.session_state.steps)} ({progress_percent:.0f}%)")
         
         with nav_col4:
-            if st.button("Next ➡️", disabled=st.session_state.current_step >= len(st.session_state.steps) - 1, width='stretch', key="anim_next"):
+            if st.button("Next ➡️", disabled=st.session_state.current_step >= len(st.session_state.steps) - 1, use_container_width=True, key="anim_next"):
                 st.session_state.current_step += 1
                 st.session_state.auto_play = False
                 st.rerun()
