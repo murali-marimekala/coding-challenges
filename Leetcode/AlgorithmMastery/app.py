@@ -180,6 +180,10 @@ def render_worked_example(example_data: dict, difficulty: str):
         st.error("No solution found!")
         return
     
+    # Calculate current step once at the top
+    current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
+    current_step = steps[current_step_idx]
+    
     # Problem Overview (Expandable)
     with st.expander("📋 Problem Overview", expanded=True):
         st.markdown(f"**Scenario:** {example_data['explanation']}")
@@ -219,9 +223,6 @@ def render_worked_example(example_data: dict, difficulty: str):
     
     # Current Step Analysis (Expandable)
     with st.expander("📍 Current Step Analysis", expanded=True):
-        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
-        current_step = steps[current_step_idx]
-        
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric("Step", f"{current_step_idx + 1}/{len(steps)}")
@@ -235,9 +236,6 @@ def render_worked_example(example_data: dict, difficulty: str):
     
     # Hash Map Evolution (Expandable)
     with st.expander("🗺️ Hash Map Evolution", expanded=True):
-        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
-        current_step = steps[current_step_idx]
-        
         col1, col2 = st.columns(2)
         
         with col1:
@@ -254,14 +252,10 @@ def render_worked_example(example_data: dict, difficulty: str):
     
     # Array Visualization (Expandable)
     with st.expander("📊 Array Pointer", expanded=True):
-        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
-        current_step = steps[current_step_idx]
         HashMapVisualizer.render_array_with_pointer(example_data['array'], current_step['current_index'])
     
     # Step Explanation (Expandable)
     with st.expander("📖 Step Explanation", expanded=True):
-        current_step_idx = min(st.session_state.playback_step, len(steps) - 1)
-        current_step = steps[current_step_idx]
         for line in example_data['step_explanations']:
             st.write(line)
         
