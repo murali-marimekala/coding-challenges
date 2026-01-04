@@ -1117,7 +1117,7 @@ with config_col2:
     target = st.number_input("🎯 Target:", value=default_target, label_visibility="collapsed", step=1)
 
 with config_col3:
-    if st.button("🎲 Auto", use_container_width=True):
+    if st.button("🎲 Auto", width='stretch'):
         # Generate random array and target with bounds checking
         MIN_ARRAY_SIZE = 2
         MAX_ARRAY_SIZE = 8
@@ -1144,7 +1144,7 @@ with config_col4:
 
 with config_col5:
     theme_icon = "🌙" if not st.session_state.dark_mode else "☀️"
-    if st.button(theme_icon, help="Toggle dark/light mode", use_container_width=True):
+    if st.button(theme_icon, help="Toggle dark/light mode", width='stretch'):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
 
@@ -1179,21 +1179,21 @@ with st.expander("⚙️ Learning Settings", expanded=False):
     edge_col1, edge_col2, edge_col3 = st.columns(3, gap="small")
     
     with edge_col1:
-        if st.button("Duplicates", use_container_width=True, help="Test with duplicate numbers"):
+        if st.button("Duplicates", width='stretch', help="Test with duplicate numbers"):
             st.session_state.auto_nums = [1, 1, 2]
             st.session_state.auto_target = 2
             st.session_state.current_step = 0
             st.rerun()
     
     with edge_col2:
-        if st.button("Negatives", use_container_width=True, help="Test with negative numbers"):
+        if st.button("Negatives", width='stretch', help="Test with negative numbers"):
             st.session_state.auto_nums = [-2, 7, 11, 15]
             st.session_state.auto_target = 5
             st.session_state.current_step = 0
             st.rerun()
     
     with edge_col3:
-        if st.button("Boundary", use_container_width=True, help="Test with target at edge"):
+        if st.button("Boundary", width='stretch', help="Test with target at edge"):
             st.session_state.auto_nums = [1, 2, 3]
             st.session_state.auto_target = 4
             st.session_state.current_step = 0
@@ -1280,18 +1280,18 @@ else:
                 # Navigation controls - compact and close to code
                 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([0.9, 0.9, 1.2, 0.9, 0.5], gap="small")
                 with nav_col1:
-                    if st.button("⬅️ Prev", disabled=st.session_state.current_step == 0, use_container_width=True):
+                    if st.button("⬅️ Prev", disabled=st.session_state.current_step == 0, width='stretch'):
                         st.session_state.current_step -= 1
                         st.rerun()
                 with nav_col2:
-                    if st.button("🔄 Reset", use_container_width=True):
+                    if st.button("🔄 Reset", width='stretch'):
                         st.session_state.current_step = 0
                         st.rerun()
                 with nav_col3:
                     progress_percent = ((st.session_state.current_step + 1) / total_steps * 100) if total_steps > 0 else 0
                     st.caption(f"Step {st.session_state.current_step + 1}/{total_steps} ({progress_percent:.0f}%)")
                 with nav_col4:
-                    if st.button("Next ➡️", disabled=st.session_state.current_step >= total_steps - 1, use_container_width=True):
+                    if st.button("Next ➡️", disabled=st.session_state.current_step >= total_steps - 1, width='stretch'):
                         st.session_state.current_step += 1
                         st.rerun()
                 with nav_col5:
@@ -1303,7 +1303,7 @@ else:
                 # Array visualization - full width
                 st.markdown("**📊 Array Pointer**")
                 array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
-                st.plotly_chart(array_fig, use_container_width=True, config={'displayModeBar': False})
+                st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
                 
                 # Hash map and Memory State side by side
                 viz_col1, viz_col2 = st.columns([1.2, 0.8], gap="medium")
@@ -1311,7 +1311,7 @@ else:
                 with viz_col1:
                     st.markdown("**🗂️ Hash Map State**")
                     hashmap_fig = create_animated_hashmap(step['map_after'], step['step_number'], step['found'])
-                    st.plotly_chart(hashmap_fig, use_container_width=True, config={'displayModeBar': False})
+                    st.plotly_chart(hashmap_fig, width='stretch', config={'displayModeBar': False})
                 
                 with viz_col2:
                     st.markdown("**📋 Memory State (Python Tutor Style)**")
@@ -1334,7 +1334,7 @@ else:
                                 before_df = pd.DataFrame([
                                     {"K": k, "V": v} for k, v in sorted(step['map_before'].items())
                                 ])
-                                st.dataframe(before_df, use_container_width=True, hide_index=True, height=80)
+                                st.dataframe(before_df, width='stretch', hide_index=True, height=80)
                             else:
                                 st.caption("{ }")
                         
@@ -1344,7 +1344,7 @@ else:
                                 after_df = pd.DataFrame([
                                     {"K": k, "V": v} for k, v in sorted(step['map_after'].items())
                                 ])
-                                st.dataframe(after_df, use_container_width=True, hide_index=True, height=80)
+                                st.dataframe(after_df, width='stretch', hide_index=True, height=80)
                             else:
                                 st.caption("{ }")
                     
@@ -1444,7 +1444,7 @@ else:
                                 })
                         
                         if memory_data:
-                            st.dataframe(pd.DataFrame(memory_data), use_container_width=True, hide_index=True, height=120)
+                            st.dataframe(pd.DataFrame(memory_data), width='stretch', hide_index=True, height=120)
     
     elif execution_mode == "Show All Steps":
         st.subheader("📋 All Steps Summary")
@@ -1460,7 +1460,7 @@ else:
                 "Map": str(step['map_after'])
             })
         
-        st.dataframe(pd.DataFrame(all_steps_data), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(all_steps_data), width='stretch', hide_index=True)
         
         # Final result
         if st.session_state.steps and st.session_state.steps[-1].get('found'):
@@ -1488,11 +1488,11 @@ else:
             st.session_state.animation_speed = play_speed
         
         with anim_col2:
-            if st.button("▶️ Play All", use_container_width=True):
+            if st.button("▶️ Play All", width='stretch'):
                 st.session_state.auto_play = True
         
         with anim_col3:
-            if st.button("⏸️ Stop", use_container_width=True):
+            if st.button("⏸️ Stop", width='stretch'):
                 st.session_state.auto_play = False
         
         # Initialize auto_play state if needed
@@ -1504,13 +1504,13 @@ else:
         nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([1, 1, 1.5, 1, 0.5], gap="small")
         
         with nav_col1:
-            if st.button("⬅️ Previous", disabled=st.session_state.current_step == 0, use_container_width=True, key="anim_prev"):
+            if st.button("⬅️ Previous", disabled=st.session_state.current_step == 0, width='stretch', key="anim_prev"):
                 st.session_state.current_step -= 1
                 st.session_state.auto_play = False
                 st.rerun()
         
         with nav_col2:
-            if st.button("🔄 Reset", use_container_width=True, key="anim_reset"):
+            if st.button("🔄 Reset", width='stretch', key="anim_reset"):
                 st.session_state.current_step = 0
                 st.session_state.auto_play = False
                 st.rerun()
@@ -1521,7 +1521,7 @@ else:
                 st.caption(f"Step {st.session_state.current_step + 1}/{len(st.session_state.steps)} ({progress_percent:.0f}%)")
         
         with nav_col4:
-            if st.button("Next ➡️", disabled=st.session_state.current_step >= len(st.session_state.steps) - 1, use_container_width=True, key="anim_next"):
+            if st.button("Next ➡️", disabled=st.session_state.current_step >= len(st.session_state.steps) - 1, width='stretch', key="anim_next"):
                 st.session_state.current_step += 1
                 st.session_state.auto_play = False
                 st.rerun()
@@ -1557,12 +1557,12 @@ else:
                     with col1:
                         st.markdown("**📊 Array Visualization**")
                         array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
-                        st.plotly_chart(array_fig, use_container_width=True, config={'displayModeBar': False})
+                        st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
                     
                     with col2:
                         st.markdown("**🗂️ Hash Map State**")
                         hashmap_fig = create_animated_hashmap(step['map_after'], idx + 1, step['found'])
-                        st.plotly_chart(hashmap_fig, use_container_width=True, config={'displayModeBar': False})
+                        st.plotly_chart(hashmap_fig, width='stretch', config={'displayModeBar': False})
                     
                     with col3:
                         st.markdown("**📖 Step Details**")
@@ -1612,12 +1612,12 @@ else:
             with col1:
                 st.markdown("**📊 Array Visualization**")
                 array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
-                st.plotly_chart(array_fig, use_container_width=True, config={'displayModeBar': False})
+                st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
             
             with col2:
                 st.markdown("**🗂️ Hash Map State**")
                 hashmap_fig = create_animated_hashmap(step['map_after'], st.session_state.current_step + 1, step['found'])
-                st.plotly_chart(hashmap_fig, use_container_width=True, config={'displayModeBar': False})
+                st.plotly_chart(hashmap_fig, width='stretch', config={'displayModeBar': False})
             
             with col3:
                 st.markdown("**📖 Step Details**")
@@ -1666,7 +1666,7 @@ else:
                 "Value": nums,
                 "Solution": ["✅" if i in step['result'] else "" for i in range(len(nums))]
             })
-            st.dataframe(result_df, use_container_width=True, hide_index=True)
+            st.dataframe(result_df, width='stretch', hide_index=True)
             
             st.metric("Steps Executed", total_steps)
         else:
