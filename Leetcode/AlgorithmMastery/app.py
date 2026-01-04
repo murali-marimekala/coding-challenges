@@ -194,6 +194,16 @@ def render_worked_example(example_data: dict, difficulty: str):
             st.metric("Target Sum", example_data['target'])
         with col3:
             st.metric("Expected Output", str(example_data['expected']))
+        
+        # Auto button to generate new test case
+        st.divider()
+        if st.button("🎲 Generate New Test Case", use_container_width=True, key="auto_generate"):
+            nums, target = generate_random_test_case()
+            st.session_state.custom_array = nums
+            st.session_state.custom_target = target
+            st.session_state.playback_step = 0
+            st.success(f"✅ New test case generated: {nums} → {target}")
+            st.rerun()
     
     # Algorithm Code with Controls (Expandable)
     with st.expander("💻 Algorithm Code", expanded=True):
@@ -454,9 +464,6 @@ def main():
             current_example,
             st.session_state.current_difficulty
         )
-    
-    with col_sidebar:
-        render_sidebar()
 
 
 if __name__ == "__main__":
