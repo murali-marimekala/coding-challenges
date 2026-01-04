@@ -1272,6 +1272,10 @@ else:
 if not nums:
     st.info("👈 Enter an array and target sum above!")
 else:
+# Main content
+if not nums:
+    st.info("👈 Enter an array and target sum above!")
+else:
     if execution_mode == "Step by Step":
         # Ensure current_step is within valid range
         st.session_state.current_step = min(st.session_state.current_step, len(st.session_state.steps) - 1)
@@ -1280,19 +1284,23 @@ else:
         if st.session_state.steps and st.session_state.current_step < len(st.session_state.steps):
             step = st.session_state.steps[st.session_state.current_step]
             
-            # Two Column Layout: Algorithm Code (Left/Wider) | Scrollable Execution State (Right/Narrower)
-            col_code, col_state = st.columns([55, 45], gap="0")
+            # TITLE + PROGRESS
+            st.markdown("### 🎯 Two Sum Algorithm Walkthrough")
+            progress_percent = ((st.session_state.current_step + 1) / len(st.session_state.steps) * 100) if len(st.session_state.steps) > 0 else 0
+            st.caption(f"Step {st.session_state.current_step + 1}/{len(st.session_state.steps)} ({progress_percent:.0f}%)")
+            st.progress(progress_percent / 100 if progress_percent > 0 else 0)
             
-            # LEFT: Algorithm Code with cursor
+            # MAIN LAYOUT: Code (Left) | Variables (Right)
+            col_code, col_vars = st.columns([55, 45], gap="0")
+            
+            # LEFT: Algorithm Code with navigation
             with col_code:
                 # Algorithm Code - expandable
                 with st.expander("📝 Algorithm Code", expanded=True):
-                    # Determine which line is executing
-                    # All iterations start at line 4 (for loop), then check line 6 (if), then line 7 (return) or line 8 (add to map)
                     cursor_line = step.get('code_line', 4)
                     st.markdown(display_algorithm_code(cursor_line, st.session_state.selected_language), unsafe_allow_html=True)
                 
-                # Navigation controls - compact and close to code
+                # Navigation controls
                 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([0.9, 0.9, 1.2, 0.9, 0.5], gap="0")
                 with nav_col1:
                     if st.button("⬅️ Prev", disabled=st.session_state.current_step == 0, use_container_width=True):
@@ -1303,163 +1311,102 @@ else:
                         st.session_state.current_step = 0
                         st.rerun()
                 with nav_col3:
-                    progress_percent = ((st.session_state.current_step + 1) / total_steps * 100) if total_steps > 0 else 0
-                    st.caption(f"Step {st.session_state.current_step + 1}/{total_steps} ({progress_percent:.0f}%)")
+                    st.empty()
                 with nav_col4:
-                    if st.button("Next ➡️", disabled=st.session_state.current_step >= total_steps - 1, use_container_width=True):
+                    if st.button("Next ➡️", disabled=st.session_state.current_step >= len(st.session_state.steps) - 1, use_container_width=True):
                         st.session_state.current_step += 1
                         st.rerun()
                 with nav_col5:
-                    st.empty()  # Spacer
-                
-                # Animated Visualizations - Full width
-                st.markdown("**🎨 Live Visualization**")
-                
-                # Array visualization - full width
-                st.markdown("**📊 Array Pointer**")
-                array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
-                st.plotly_chart(array_fig, width='stretch', config={'displayModeBar': False})
-                
-                # Hash map and Memory State side by side
-                viz_col1, viz_col2 = st.columns([1.2, 0.8], gap="0")
-                
-                with viz_col1:
-                    st.markdown("**🗂️ Hash Map State**")
-                    hashmap_fig = create_animated_hashmap(step['map_after'], step['step_number'], step['found'])
-                    st.plotly_chart(hashmap_fig, width='stretch', config={'displayModeBar': False})
-                
-                with viz_col2:
-                    st.markdown("**📋 Memory State (Python Tutor Style)**")
-                    st.markdown(create_memory_state_visualization(step), unsafe_allow_html=True)
+                    st.empty()
             
-            # RIGHT: Scrollable Execution State + Variables using container
-            with col_state:
-                # Use a container that will scroll
-                with st.container(border=False):
-                    # Current iteration info - collapsible
-                    with st.expander("🔍 Current Iteration", expanded=True):
-                        st.markdown(f"**i:** `{step['current_index']}` | **num:** `{step['current_number']}` | **complement:** `{step['complement_needed']}`", help=None)
-                    
-                    # Hash Map Evolution - collapsible
-                    with st.expander("🗺️ Hash Map", expanded=True):
-                        map_col1, map_col2 = st.columns(2, gap="0")
-                        with map_col1:
-                            st.caption("Before:")
-                            if step['map_before']:
-                                before_df = pd.DataFrame([
-                                    {"K": k, "V": v} for k, v in sorted(step['map_before'].items())
-                                ])
-                                st.dataframe(before_df, width='stretch', hide_index=True, height=80)
-                            else:
-                                st.caption("{ }")
-                        
-                        with map_col2:
-                            st.caption("After:")
-                            if step['map_after']:
-                                after_df = pd.DataFrame([
-                                    {"K": k, "V": v} for k, v in sorted(step['map_after'].items())
-                                ])
-                                st.dataframe(after_df, width='stretch', hide_index=True, height=80)
-                            else:
-                                st.caption("{ }")
-                    
-                    # Variables Watch - collapsible
-                    with st.expander("👁️ Variables", expanded=True):
-                        var_order = ['i', 'num', 'target', 'complement', 'complement_map', 'nums']
-                        
-                        # Determine which variables are active in this step
-                        active_vars = {'i', 'num', 'target', 'complement', 'complement_map', 'nums'}
-                        if step['found']:
-                            active_vars = {'i', 'complement', 'complement_map'}  # Focus on the found variables
-                        
-                        var_data = []
-                        for var_name in var_order:
-                            if var_name in step['variables']:
-                                value = step['variables'][var_name]
-                                is_active = var_name in active_vars
-                                highlight = "✓" if is_active else " "
-                                var_data.append({
-                                    "": highlight,
-                                    "Var": var_name,
-                                    "Value": str(value),
-                                    "_active": is_active
-                                })
-                        
-                        if var_data:
-                            df = pd.DataFrame(var_data)
-                            # Create HTML with highlighting for active variables - with dark mode support
-                            html_table = "<table class='variables-table'><tr class='variables-header'>"
-                            html_table += "<th style='padding: 8px; text-align: left; width: 5%;'></th>"
-                            html_table += "<th style='padding: 8px; text-align: left; width: 30%;'>Var</th>"
-                            html_table += "<th style='padding: 8px; text-align: left; width: 65%;'>Value</th>"
-                            html_table += "</tr>"
-                            
-                            for _, row in df.iterrows():
-                                active_class = "variables-row-active" if row["_active"] else "variables-row-inactive"
-                                html_table += f"<tr class='{active_class}'>"
-                                html_table += f"<td class='variables-cell-icon'>{row['']}</td>"
-                                html_table += f"<td class='variables-cell-name'><code>{row['Var']}</code></td>"
-                                html_table += f"<td class='variables-cell-value'><code>{row['Value']}</code></td>"
-                                html_table += "</tr>"
-                            
-                            html_table += "</table>"
-                            st.markdown(html_table, unsafe_allow_html=True)
-                        
-                        # Status & Result
-                        if step['found']:
-                            st.success(f"✅ **Solution Found!** Indices: [{step['found_at_index']}, {step['current_index']}] = {step['result_values'][0]} + {step['result_values'][1]}")
+            # RIGHT: Variables and Memory State
+            with col_vars:
+                # Current iteration info
+                with st.expander("🔍 Current Step", expanded=True):
+                    st.markdown(f"**i:** `{step['current_index']}` | **num:** `{step['current_number']}` | **need:** `{step['complement_needed']}`")
+                
+                # Hash Map Evolution
+                with st.expander("🗺️ Hash Map", expanded=True):
+                    map_col1, map_col2 = st.columns(2, gap="0")
+                    with map_col1:
+                        st.caption("Before:")
+                        if step['map_before']:
+                            before_df = pd.DataFrame([
+                                {"K": k, "V": v} for k, v in sorted(step['map_before'].items())
+                            ])
+                            st.dataframe(before_df, use_container_width=True, hide_index=True, height=80)
                         else:
-                            st.info(f"➕ **Added:** {step['current_number']} at index {step['current_index']}")
+                            st.caption("{ }")
                     
-                    # Step Analysis - below variables
-                    with st.expander("📊 Step Analysis", expanded=False):
-                        # Step Explanation
-                        st.markdown("**📖 Explanation**")
-                        explanation = get_step_explanation(step, st.session_state.explanation_depth)
-                        st.markdown(f'<div class="explanation-box">{explanation}</div>', unsafe_allow_html=True)
-                        
-                        # Complement Calculation Visualization
-                        st.markdown("**🔢 Complement Calculation**")
-                        complement_html = f"""
-                        <div class="formula-box">
-                        target: <span class="value-highlight target-color">{step['variables']['target']}</span>
-                        -
-                        current: <span class="value-highlight current-color">{step['current_number']}</span>
-                        =
-                        complement: <span class="value-highlight complement-color">{step['complement_needed']}</span>
-                        </div>
-                        """
-                        st.markdown(complement_html, unsafe_allow_html=True)
-                        
-                        # Execution Flow Diagram
-                        st.markdown("**🔀 Execution Flow**")
-                        st.markdown(get_flow_diagram(step), unsafe_allow_html=True)
-                        
-                        # Space vs Speed Visualization
-                        st.markdown("**⚡ Space-Speed Trade-off**")
-                        st.markdown(get_space_speed_info(step, len(nums)), unsafe_allow_html=True)
+                    with map_col2:
+                        st.caption("After:")
+                        if step['map_after']:
+                            after_df = pd.DataFrame([
+                                {"K": k, "V": v} for k, v in sorted(step['map_after'].items())
+                            ])
+                            st.dataframe(after_df, use_container_width=True, hide_index=True, height=80)
+                        else:
+                            st.caption("{ }")
+                
+                # Variables Watch
+                with st.expander("👁️ Variables", expanded=True):
+                    var_order = ['i', 'num', 'target', 'complement', 'complement_map', 'nums']
+                    active_vars = {'i', 'num', 'target', 'complement', 'complement_map', 'nums'}
+                    if step['found']:
+                        active_vars = {'i', 'complement', 'complement_map'}
                     
-                    # Memory allocation table - collapsible
-                    with st.expander("💾 Memory Allocation", expanded=False):
-                        import sys
-                        memory_data = []
-                        for var_name in ['nums', 'complement_map', 'i', 'num', 'target', 'complement']:
-                            if var_name in step['variables']:
-                                value = step['variables'][var_name]
-                                size_bytes = sys.getsizeof(value)
-                                # Format size in bytes or KB
-                                if size_bytes > 1024:
-                                    size_str = f"{size_bytes / 1024:.2f} KB"
-                                else:
-                                    size_str = f"{size_bytes} B"
-                                memory_data.append({
-                                    "Variable": var_name,
-                                    "Size": size_str,
-                                    "Type": type(value).__name__
-                                })
+                    var_data = []
+                    for var_name in var_order:
+                        if var_name in step['variables']:
+                            value = step['variables'][var_name]
+                            is_active = var_name in active_vars
+                            highlight = "✓" if is_active else " "
+                            var_data.append({
+                                "": highlight,
+                                "Var": var_name,
+                                "Value": str(value),
+                                "_active": is_active
+                            })
+                    
+                    if var_data:
+                        df = pd.DataFrame(var_data)
+                        html_table = "<table class='variables-table'><tr class='variables-header'>"
+                        html_table += "<th style='padding: 8px; text-align: left; width: 5%;'></th>"
+                        html_table += "<th style='padding: 8px; text-align: left; width: 30%;'>Var</th>"
+                        html_table += "<th style='padding: 8px; text-align: left; width: 65%;'>Value</th>"
+                        html_table += "</tr>"
                         
-                        if memory_data:
-                            st.dataframe(pd.DataFrame(memory_data), width='stretch', hide_index=True, height=120)
+                        for _, row in df.iterrows():
+                            active_class = "variables-row-active" if row["_active"] else "variables-row-inactive"
+                            html_table += f"<tr class='{active_class}'>"
+                            html_table += f"<td class='variables-cell-icon'>{row['']}</td>"
+                            html_table += f"<td class='variables-cell-name'><code>{row['Var']}</code></td>"
+                            html_table += f"<td><code>{row['Value']}</code></td>"
+                            html_table += "</tr>"
+                        
+                        html_table += "</table>"
+                        st.markdown(html_table, unsafe_allow_html=True)
+            
+            # BELOW: Visualizations
+            st.markdown("**🎨 Live Visualization**")
+            
+            # Array visualization
+            st.markdown("**📊 Array State**")
+            array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
+            st.plotly_chart(array_fig, use_container_width=True, config={'displayModeBar': False})
+            
+            # Hash map visualization
+            st.markdown("**🗂️ Hash Map Visual**")
+            hashmap_fig = create_animated_hashmap(step['map_after'], step['step_number'], step['found'])
+            st.plotly_chart(hashmap_fig, use_container_width=True, config={'displayModeBar': False})
+            
+            # Memory state visualization
+            st.markdown("**📋 Memory State**")
+            st.markdown(create_memory_state_visualization(step), unsafe_allow_html=True)
+            
+            # Step explanation
+            explanation = get_step_explanation(step, st.session_state.explanation_depth)
+            st.markdown(f'<div class="explanation-box">{explanation}</div>', unsafe_allow_html=True)
     
     elif execution_mode == "Show All Steps":
         st.subheader("📋 All Steps Summary")
