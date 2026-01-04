@@ -4,6 +4,9 @@ REM Usage: run.bat
 
 setlocal enabledelayedexpansion
 
+REM Change to the script directory
+cd /d "%~dp0"
+
 echo.
 echo 🎯 Algorithm Mastery Platform
 echo ================================
