@@ -63,21 +63,37 @@ st.markdown("""
         margin-bottom: 0 !important;
         margin-top: 0 !important;
         padding: 0 !important;
-        border: 0 !important;
+        border: none !important;
     }
-    /* Remove vertical gaps */
+    /* Remove border from expanders */
+    .streamlit-expanderHeader {
+        border: none !important;
+        border-bottom: 1px solid rgba(49, 51, 63, 0.2) !important;
+    }
+    /* Remove vertical gaps - AGGRESSIVE */
     div[data-testid="stVerticalBlock"] > div {
         gap: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
+        row-gap: 0 !important;
     }
     /* Remove gaps between expanders */
     div[data-testid="stExpanderContainer"] {
         gap: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        row-gap: 0 !important;
+    }
+    /* Ultra-aggressive vertical spacing */
+    section[data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+    }
+    section[data-testid="stVerticalBlock"] > div > div {
+        gap: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
     }
     /* Reduce horizontal rule spacing */
     hr {
@@ -119,8 +135,36 @@ st.markdown("""
     .stMetric {
         margin: 0 !important;
         padding: 0 !important;
+        gap: 0 !important;
+    }
+    .stMetricLabel {
+        font-size: 0.75rem !important;
+        line-height: 1.2 !important;
+    }
+    .stMetricValue {
+        font-size: 0.85rem !important;
     }
     .stCaption {
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 0.65rem !important;
+        line-height: 1 !important;
+        margin-bottom: -0.5rem !important;
+    }
+    /* Reduce progress bar spacing */
+    .stProgress {
+        margin: 0 !important;
+        padding: 0 !important;
+        margin-top: -0.3rem !important;
+        margin-bottom: -0.3rem !important;
+    }
+    /* Compact info/alert boxes */
+    .stAlert {
+        margin: 0 !important;
+        padding: 0.3rem 0.5rem !important;
+    }
+    /* Reduce divider spacing */
+    .stDivider {
         margin: 0 !important;
         padding: 0 !important;
     }
@@ -1268,10 +1312,6 @@ else:
     total_steps = 0
     st.session_state.current_step = 0
 
-# Main content
-if not nums:
-    st.info("👈 Enter an array and target sum above!")
-else:
 # Main content
 if not nums:
     st.info("👈 Enter an array and target sum above!")
