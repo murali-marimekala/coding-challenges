@@ -130,7 +130,7 @@ def render_worked_example(example_data: dict, difficulty: str):
     
     # Playback controls
     st.subheader("⏯️ Playback Controls")
-    playback = PlaybackController()
+    playback = PlaybackController(total_steps=len(steps))
     playback.render_controls()
     
     # Current step display
