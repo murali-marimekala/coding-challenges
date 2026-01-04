@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 from typing import List, Tuple
 import random
+import plotly.graph_objects as go
+import plotly.express as px
+import time
 
 st.set_page_config(page_title="Two Sum Solver - Step by Step", layout="wide", initial_sidebar_state="collapsed")
 
@@ -157,6 +160,49 @@ st.markdown("""
         color: #558b2f;
         margin-bottom: 4px;
     }
+    /* Animation Styles */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    @keyframes highlight {
+        0% { background-color: #ffeb3b; }
+        50% { background-color: #ffeb3b; }
+        100% { background-color: transparent; }
+    }
+    @keyframes matchFound {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    .variable-update {
+        animation: highlight 1s ease-in-out;
+        background-color: #fff9c4;
+    }
+    .array-item-current {
+        animation: pulse 0.8s infinite;
+    }
+    .hashmap-item-new {
+        animation: slideIn 0.6s ease-out;
+    }
+    .match-found-animation {
+        animation: matchFound 0.6s ease-out;
+        color: #4caf50;
+        font-weight: bold;
+    }
+    .step-progress {
+        animation: slideIn 0.4s ease-out;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -267,6 +313,91 @@ def format_variable_value(value):
         return str(value)
     else:
         return str(value)
+
+def create_animated_hashmap(map_state: dict, step_number: int, found: bool = False):
+    """Create animated Plotly visualization of hash map state"""
+    if not map_state:
+        fig = go.Figure()
+        fig.add_annotation(text="Hash Map Empty", xref="paper", yref="paper",
+                          x=0.5, y=0.5, showarrow=False, font=dict(size=20))
+        fig.update_layout(height=300, showlegend=False, margin=dict(l=0, r=0, t=20, b=0))
+        return fig
+    
+    indices = list(map_state.keys())
+    positions = list(map_state.values())
+    colors = ['#2ecc71' if found and pos == positions[-1] else '#3498db' for pos in positions]
+    
+    fig = go.Figure(data=[
+        go.Scatter(
+            x=indices,
+            y=positions,
+            mode='markers+text',
+            marker=dict(size=30, color=colors, line=dict(color='#2c3e50', width=2)),
+            text=[f'Idx:{p}' for p in positions],
+            textposition="top center",
+            hovertemplate='<b>Number: %{x}</b><br>Index: %{y}<extra></extra>',
+            showlegend=False
+        )
+    ])
+    
+    fig.update_layout(
+        title=f"Hash Map State (Step {step_number})" + (" ✅ Match Found!" if found else ""),
+        xaxis_title="Value",
+        yaxis_title="Original Index",
+        height=300,
+        template="plotly_white",
+        margin=dict(l=50, r=50, t=60, b=50),
+        hovermode='closest'
+    )
+    
+    return fig
+
+def create_array_pointer_visualization(nums: List[int], current_index: int, complement: int = None):
+    """Create visualization of array iteration with pointer"""
+    colors = []
+    for i, num in enumerate(nums):
+        if i == current_index:
+            colors.append('#e74c3c')  # Red for current
+        elif complement is not None and num == complement:
+            colors.append('#f39c12')  # Orange for complement
+        else:
+            colors.append('#95a5a6')  # Gray for others
+    
+    fig = go.Figure(data=[
+        go.Bar(
+            x=list(range(len(nums))),
+            y=nums,
+            marker=dict(color=colors, line=dict(color='#2c3e50', width=2)),
+            text=[f'{num}' for num in nums],
+            textposition='outside',
+            hovertemplate='Index: %{x}<br>Value: %{y}<extra></extra>',
+            showlegend=False
+        )
+    ])
+    
+    fig.update_layout(
+        title=f"Array Visualization (Processing Index {current_index})",
+        xaxis_title="Index",
+        yaxis_title="Value",
+        height=300,
+        template="plotly_white",
+        margin=dict(l=50, r=50, t=60, b=50),
+        showlegend=False,
+        xaxis=dict(tickmode='linear', tick0=0, dtick=1)
+    )
+    
+    return fig
+
+def create_step_progress_animation(current_step: int, total_steps: int):
+    """Create animated progress bar for step navigation"""
+    progress = current_step / max(total_steps, 1)
+    return progress
+
+def animate_variable_change(old_value, new_value, var_name: str):
+    """Return CSS class for animating variable changes"""
+    if old_value != new_value:
+        return "variable-update"
+    return ""
 
 def display_variables_watch(variables):
     """Display variables watch panel using Streamlit components"""
@@ -492,7 +623,7 @@ with config_col3:
 
 with config_col4:
     execution_mode = st.selectbox("Mode:", 
-                                 ["Step by Step", "Show All Steps", "Skip to Result"],
+                                 ["Step by Step", "Show All Steps", "Skip to Result", "🎬 Auto-Play Animation"],
                                  label_visibility="collapsed")
 
 with config_col5:
@@ -635,6 +766,20 @@ else:
                         st.rerun()
                 with nav_col5:
                     st.empty()  # Spacer
+                
+                # Animated Visualizations
+                st.markdown("**🎨 Live Visualization**")
+                anim_col1, anim_col2 = st.columns(2, gap="large")
+                
+                with anim_col1:
+                    st.markdown("**📊 Array Pointer**")
+                    array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
+                    st.plotly_chart(array_fig, use_container_width=True, config={'displayModeBar': False})
+                
+                with anim_col2:
+                    st.markdown("**🗂️ Hash Map State**")
+                    hashmap_fig = create_animated_hashmap(step['map_after'], step['step_number'], step['found'])
+                    st.plotly_chart(hashmap_fig, use_container_width=True, config={'displayModeBar': False})
                 
                 # Step Analysis - collapsible
                 with st.expander("📊 Step Analysis", expanded=True):
@@ -789,6 +934,96 @@ else:
             st.markdown(f"**Result:** `{final_step['result']}` → {final_step['result_values']}")
         else:
             st.error("❌ No solution found!")
+    
+    elif execution_mode == "🎬 Auto-Play Animation":
+        st.subheader("🎬 Animated Step-by-Step Execution")
+        
+        # Animation controls
+        anim_col1, anim_col2, anim_col3 = st.columns([2, 1, 1])
+        
+        with anim_col1:
+            play_speed = st.slider(
+                "Animation Speed", 
+                min_value=500, 
+                max_value=3000, 
+                value=st.session_state.animation_speed,
+                step=100,
+                label_visibility="collapsed"
+            )
+            st.session_state.animation_speed = play_speed
+        
+        with anim_col2:
+            if st.button("▶️ Play All", use_container_width=True):
+                st.session_state.auto_play = True
+        
+        with anim_col3:
+            if st.button("⏸️ Stop", use_container_width=True):
+                st.session_state.auto_play = False
+        
+        # Initialize auto_play state if needed
+        if 'auto_play' not in st.session_state:
+            st.session_state.auto_play = False
+        
+        # Auto-play animation loop
+        if st.session_state.auto_play and st.session_state.steps:
+            placeholder_steps = st.empty()
+            placeholder_anim = st.empty()
+            
+            for idx in range(len(st.session_state.steps)):
+                if not st.session_state.auto_play:
+                    break
+                    
+                step = st.session_state.steps[idx]
+                
+                with placeholder_steps.container():
+                    # Show current step info with animation
+                    st.markdown(f"<div class='step-progress'><h3>Step {idx + 1} of {len(st.session_state.steps)}</h3></div>", 
+                               unsafe_allow_html=True)
+                    
+                    # Three column layout for animation
+                    col1, col2, col3 = st.columns(3, gap="medium")
+                    
+                    with col1:
+                        st.markdown("**📊 Array Visualization**")
+                        array_fig = create_array_pointer_visualization(nums, step['current_index'], step['complement_needed'])
+                        st.plotly_chart(array_fig, use_container_width=True, config={'displayModeBar': False})
+                    
+                    with col2:
+                        st.markdown("**🗂️ Hash Map State**")
+                        hashmap_fig = create_animated_hashmap(step['map_after'], idx + 1, step['found'])
+                        st.plotly_chart(hashmap_fig, use_container_width=True, config={'displayModeBar': False})
+                    
+                    with col3:
+                        st.markdown("**📖 Step Details**")
+                        st.info(f"""
+                        **Current Number:** {step['current_number']}  
+                        **Looking for:** {step['complement_needed']}  
+                        **Found:** {'✅ YES' if step['found'] else '❌ NO'}
+                        """)
+                    
+                    # Step explanation
+                    explanation = get_step_explanation(step, st.session_state.explanation_depth)
+                    st.markdown(f'<div class="explanation-box">{explanation}</div>', unsafe_allow_html=True)
+                
+                # Progress bar animation
+                progress = (idx + 1) / len(st.session_state.steps)
+                st.progress(progress)
+                
+                # Wait based on animation speed
+                time.sleep(play_speed / 1000)
+            
+            # Final result
+            st.markdown("---")
+            if st.session_state.steps[-1].get('found'):
+                final_step = st.session_state.steps[-1]
+                st.success(f"✅ **Solution Found!** Indices: [{final_step['result'][0]}, {final_step['result'][1]}]")
+                st.metric("Values", f"{final_step['result_values'][0]} + {final_step['result_values'][1]} = {target}")
+            else:
+                st.error("❌ No solution found!")
+            
+            st.session_state.auto_play = False
+        else:
+            st.info("👆 Click 'Play All' to start the animated walkthrough")
     
     else:  # Skip to Result
         st.subheader("🏁 Final Result")
