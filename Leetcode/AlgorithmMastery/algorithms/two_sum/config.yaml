@@ -1,0 +1,70 @@
+algorithm_id: "two_sum"
+name: "Two Sum"
+description: "Find two numbers in an array that add up to a target value"
+difficulty: "Easy"
+leetcode_id: 1
+patterns: ["Hash Table", "Two Pointers"]
+tags: ["array", "hash-map", "interview-essential"]
+
+learning_objectives:
+  - "Understand hash table lookups (O(1) vs O(n))"
+  - "Recognize complement pattern (target - current = needed)"
+  - "Trade-off between space and time complexity"
+  - "Pattern recognition for similar problems (3Sum, 4Sum, Two Sum II)"
+
+prerequisites:
+  - "Basic array understanding"
+  - "Hash table / dictionary basics"
+
+complexity:
+  optimal:
+    time: "O(n)"
+    space: "O(n)"
+    approach: "Hash Map"
+  brute_force:
+    time: "O(n²)"
+    space: "O(1)"
+    approach: "Nested Loops"
+
+difficulty_levels:
+  easy:
+    target: "Simple happy path"
+    test_cases:
+      - array: [2, 7, 11, 15]
+        target: 9
+        expected: [0, 1]
+        explanation: "2 + 7 = 9. Indices 0 and 1."
+    
+  medium:
+    target: "Edge cases and variations"
+    test_cases:
+      - array: [3, 2, 4]
+        target: 6
+        expected: [1, 2]
+        explanation: "2 + 4 = 6. Duplicate target with different indices."
+      - array: [3, 3]
+        target: 6
+        expected: [0, 1]
+        explanation: "Same number used twice (duplicates)."
+  
+  hard:
+    target: "Negative numbers and complex scenarios"
+    test_cases:
+      - array: [-1, -2, -3, 5, 10]
+        target: 7
+        expected: [-2, 9]
+        explanation: "-2 + 9 = 7 (but 9 not in array - no solution case)"
+      - array: [-10, -1, 0, 5, 9]
+        target: -1
+        expected: [-10, 9]
+        explanation: "-10 + 9 = -1. Handling negative numbers."
+
+pseudocode: |
+  function twoSum(nums, target):
+    map = {}
+    for i = 0 to len(nums):
+        complement = target - nums[i]
+        if complement in map:
+            return [map[complement], i]
+        map[nums[i]] = i
+    return []
