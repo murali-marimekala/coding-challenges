@@ -5,7 +5,9 @@ Tier 1: Core Learning Foundation with Worked Examples
 
 import streamlit as st
 import sys
+import random
 from pathlib import Path
+from typing import List, Tuple
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -67,6 +69,70 @@ def get_examples_for_difficulty(difficulty: str):
         'Hard': HARD_EXAMPLES
     }
     return examples_map.get(difficulty, EASY_EXAMPLES)
+
+
+def generate_random_test_case() -> Tuple[List[int], int]:
+    """Generate random test cases covering various scenarios"""
+    case_type = random.choice([
+        'simple',           # Small positive numbers
+        'negatives',        # Mix of positive and negative
+        'duplicates',       # Duplicate numbers
+        'zeros',            # Include zeros
+        'large',            # Larger array
+        'corner',           # Corner cases (min/max values)
+    ])
+    
+    if case_type == 'simple':
+        # Simple case: small positive numbers
+        size = random.randint(2, 5)
+        nums = [random.randint(1, 20) for _ in range(size)]
+        target = random.choice(nums) + random.choice(nums)
+    
+    elif case_type == 'negatives':
+        # Mix of positive and negative numbers
+        size = random.randint(2, 6)
+        nums = [random.randint(-20, 20) for _ in range(size)]
+        target = sum(random.sample(nums, 2))
+    
+    elif case_type == 'duplicates':
+        # Numbers with duplicates
+        base = random.randint(1, 10)
+        size = random.randint(3, 7)
+        nums = [base] * (size - 1) + [random.randint(1, 20)]
+        target = base + nums[-1]
+    
+    elif case_type == 'zeros':
+        # Include zeros
+        size = random.randint(2, 5)
+        nums = [0, 0] + [random.randint(-10, 10) for _ in range(size - 2)]
+        random.shuffle(nums)
+        target = random.choice(nums) + random.choice(nums)
+    
+    elif case_type == 'large':
+        # Larger array
+        size = random.randint(8, 15)
+        nums = [random.randint(-100, 100) for _ in range(size)]
+        target = sum(random.sample(nums, 2))
+    
+    else:  # corner
+        # Corner cases
+        corner_types = random.choice([
+            'two_elements',     # Exactly 2 elements
+            'negative_target',  # Negative target
+            'large_numbers',    # Large numbers
+        ])
+        
+        if corner_types == 'two_elements':
+            nums = [random.randint(-100, 100), random.randint(-100, 100)]
+            target = sum(nums)
+        elif corner_types == 'negative_target':
+            nums = [random.randint(-50, 0) for _ in range(random.randint(2, 5))]
+            target = sum(random.sample(nums, 2))
+        else:  # large_numbers
+            nums = [random.randint(-1000, 1000) for _ in range(random.randint(2, 6))]
+            target = sum(random.sample(nums, 2))
+    
+    return nums, target
 
 
 def render_difficulty_tabs():
@@ -251,6 +317,12 @@ def main():
     """Main application"""
     initialize_session_state()
     
+    # Initialize custom input state
+    if 'custom_array' not in st.session_state:
+        st.session_state.custom_array = None
+    if 'custom_target' not in st.session_state:
+        st.session_state.custom_target = None
+    
     # Header
     st.title("🎯 Algorithm Mastery Platform")
     st.markdown("**Learn difficult algorithms through interactive worked examples**")
@@ -270,40 +342,118 @@ def main():
         
         st.divider()
         
-        # Difficulty selection
-        st.subheader("🎚️ Select Difficulty Level")
-        render_difficulty_tabs()
+        # Custom Input Section
+        with st.expander("🎮 Custom Input & Random Test Cases", expanded=False):
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                st.subheader("Enter Custom Values")
+                array_input = st.text_input(
+                    "Array (comma-separated numbers)",
+                    placeholder="e.g., 2,7,11,15",
+                    help="Enter integers separated by commas"
+                )
+                target_input = st.number_input(
+                    "Target Sum",
+                    value=9,
+                    help="The sum you want to find"
+                )
+                
+                if st.button("🔄 Use Custom Input", use_container_width=True):
+                    try:
+                        if array_input.strip():
+                            nums = [int(x.strip()) for x in array_input.split(',')]
+                            st.session_state.custom_array = nums
+                            st.session_state.custom_target = int(target_input)
+                            st.success(f"✅ Custom input set: {nums} → {int(target_input)}")
+                        else:
+                            st.error("❌ Please enter array values")
+                    except ValueError:
+                        st.error("❌ Invalid input. Please enter integers only.")
+            
+            with col2:
+                st.subheader("Random Generation")
+                if st.button("🎲 Generate Random", use_container_width=True, key="random_btn"):
+                    nums, target = generate_random_test_case()
+                    st.session_state.custom_array = nums
+                    st.session_state.custom_target = target
+                    st.success(f"✅ Generated: {nums}")
+                    st.info(f"Target: {target}")
+                
+                st.markdown("""
+                **Covers:**
+                - Simple positive numbers
+                - Negative numbers
+                - Duplicates
+                - Zeros
+                - Large arrays
+                - Corner cases
+                """)
+            
+            # Show current custom input
+            if st.session_state.custom_array is not None:
+                st.divider()
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write("**Current Custom Input:**")
+                    st.code(f"nums = {st.session_state.custom_array}")
+                with col2:
+                    st.write("**Target:**")
+                    st.code(f"target = {st.session_state.custom_target}")
+                
+                if st.button("❌ Clear Custom Input", use_container_width=True):
+                    st.session_state.custom_array = None
+                    st.session_state.custom_target = None
+                    st.rerun()
         
         st.divider()
         
-        # Get examples for current difficulty
-        examples = get_examples_for_difficulty(st.session_state.current_difficulty)
-        
-        # Example navigation
-        if len(examples) > 1:
-            st.subheader(f"📂 Examples ({st.session_state.current_example_idx + 1}/{len(examples)})")
-            col1, col2, col3 = st.columns([1, 2, 1])
-            
-            with col1:
-                if st.session_state.current_example_idx > 0:
-                    if st.button("⬅️ Previous", use_container_width=True):
-                        st.session_state.current_example_idx -= 1
-                        st.rerun()
-            
-            with col3:
-                if st.session_state.current_example_idx < len(examples) - 1:
-                    if st.button("Next ➡️", use_container_width=True):
-                        st.session_state.current_example_idx += 1
-                        st.rerun()
+        # Check if using custom input
+        if st.session_state.custom_array is not None:
+            st.info("🎮 Using custom input. Navigate example sections below.")
+            example_data = {
+                'array': st.session_state.custom_array,
+                'target': st.session_state.custom_target,
+                'expected': TwoSumSolver.solve_optimal(st.session_state.custom_array, st.session_state.custom_target),
+                'explanation': f'Custom test case: {st.session_state.custom_array} → {st.session_state.custom_target}',
+                'step_explanations': ['This is a custom test case. Follow the step-by-step execution below.']
+            }
+            render_worked_example(example_data, "Custom")
+        else:
+            # Difficulty selection
+            st.subheader("🎚️ Select Difficulty Level")
+            render_difficulty_tabs()
             
             st.divider()
-        
-        # Render current example
-        current_example = examples[st.session_state.current_example_idx]
-        render_worked_example(
-            current_example,
-            st.session_state.current_difficulty
-        )
+            
+            # Get examples for current difficulty
+            examples = get_examples_for_difficulty(st.session_state.current_difficulty)
+            
+            # Example navigation
+            if len(examples) > 1:
+                st.subheader(f"📂 Examples ({st.session_state.current_example_idx + 1}/{len(examples)})")
+                col1, col2, col3 = st.columns([1, 2, 1])
+                
+                with col1:
+                    if st.session_state.current_example_idx > 0:
+                        if st.button("⬅️ Previous", use_container_width=True):
+                            st.session_state.current_example_idx -= 1
+                            st.rerun()
+                
+                with col3:
+                    if st.session_state.current_example_idx < len(examples) - 1:
+                        if st.button("Next ➡️", use_container_width=True):
+                            st.session_state.current_example_idx += 1
+                            st.rerun()
+                
+                st.divider()
+            
+            # Render current example
+            current_example = examples[st.session_state.current_example_idx]
+            render_worked_example(
+                current_example,
+                st.session_state.current_difficulty
+            )
     
     with col_sidebar:
         render_sidebar()
